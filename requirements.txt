@@ -1,0 +1,4 @@
+streamlit
+statsmodels
+warnings
+seaborn
