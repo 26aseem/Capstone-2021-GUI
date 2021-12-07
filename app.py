@@ -9,7 +9,6 @@ import pickle
 from pickle import load
 from PIL import Image
 import seaborn as sns
-import warnings
 import statsmodels.api as sm
 
 ### Time Series Code goes here
