@@ -11,6 +11,24 @@ from PIL import Image
 import seaborn as sns
 import statsmodels.api as sm
 
+
+### Streamlit code starts here    
+st.title("Time Series Analysis of Disaster Tweets")
+st.markdown("The dashboard will help the government and humanitarian aid agencies to plan and coordinate the natural disaster relief efforts, resulting in more people being saved and more effective distribution of emergency supplies during a natural hazard")
+st.sidebar.title("Select Visual Charts")
+st.sidebar.markdown("Select the Charts/Plots accordingly:")
+
+# Some CSS Markdown for styling
+STYLE = """
+<style>
+img {
+     max-width: 100%;     
+}
+</style>
+"""
+st.markdown(STYLE, unsafe_allow_html=True)
+
+
 ### Time Series Code goes here
 
 # Dataset
@@ -29,13 +47,28 @@ tweets = tweets.sample(frac = 1)
 # Reindex the dataset
 tweets['index'] = list(range(0,tweets.shape[0],1))
 tweets.set_index('index', inplace=True)
+tweets['type'] = tweets['type'].map({0: 'Need', 1: 'Availability', 2: 'Other'})
 
 # Change column names for consistency
 tweets.columns = ['text', 'type']
 
-# Store the dataset
-tweets.to_csv("final_dataset.csv")
 print('Shape of the Dataset:',tweets.shape)
+
+# Dataset Description
+h = st.sidebar.slider('Select the number of tweets using the slider', 1, tweets.shape[0], 10)
+data_tweets = tweets.sample(h)
+data_tweets['index'] = list(range(0, h, 1))
+data_tweets.set_index('index', inplace=True)
+st.table(data_tweets)
+
+# Checking for class balancing and get unique labels:
+chart_visual_class_balancing = st.sidebar.checkbox('Class Labels', True)
+if chart_visual_class_balancing==True:
+    fig = plt.figure(figsize=(8, 4))
+    sns.countplot(y=tweets.loc[:, 'type'],data=tweets).set_title("Count of tweets in each class")
+    st.pyplot(fig)
+  
+tweets['type'] = tweets['type'].map({'Need':0, 'Availability':1,'Other':2})
 
 # Get all the labels used in the labelling column
 label = tweets.type.unique()
@@ -95,36 +128,6 @@ df = pd.DataFrame(count_of_data).T
 df['Date'] = pd.to_datetime(dates)
 df.set_index('Date', inplace=True)
 df.columns = ['Need', 'Availability']
-
-
-
-
-
-### Streamlit code starts here    
-st.title("Time Series Analysis of Disaster Tweets")
-st.markdown("The dashboard will help the government and humanitarian aid agencies to plan and coordinate the natural disaster relief efforts, resulting in more people being saved and more effective distribution of emergency supplies during a natural hazard")
-st.sidebar.title("Select Visual Charts")
-st.sidebar.markdown("Select the Charts/Plots accordingly:")
-
-# Some CSS Markdown for styling
-STYLE = """
-<style>
-img {
-     max-width: 100%;     
-}
-</style>
-"""
-st.markdown(STYLE, unsafe_allow_html=True)
-
-# Dataset Description
-st.table(tweets.head(10))
-
-# Checking for class balancing and get unique labels:
-chart_visual_class_balancing = st.sidebar.checkbox('Class Labels', True)
-if chart_visual_class_balancing==True:
-    fig = plt.figure(figsize=(8, 4))
-    sns.countplot(y=tweets.loc[:, 'type'],data=tweets)
-    st.pyplot(fig)
 
 
 st.title("Twitter Data Description")
@@ -245,3 +248,39 @@ if chart_visual_seasonal_decomposition == "Need of resources":
     seasonal_decompose(y)
 elif chart_visual_seasonal_decomposition == "Availability of resources":
     seasonal_decompose(z)
+    
+    
+# Footer
+footer="""<style>
+a:link , a:visited{
+color: blue;
+background-color: transparent;
+text-decoration: underline;
+}
+
+a:hover,  a:active {
+color: red;
+background-color: transparent;
+text-decoration: underline;
+}
+
+footer {visibility: hidden;}
+
+.footer {
+margin:0;
+height:5px;
+position:relative;
+top:140px;
+left: 0;
+bottom: 0;
+width: 100%;
+background-color: white;
+color: black;
+text-align: center;
+}
+</style>
+<div class="footer">
+<p>Developed with <span style='color:red;'>❤</span> by <a style='text-align: center;' href="https://github.com/26aseem" target="_blank">Aseem Khullar</a></p>
+</div>
+"""
+st.markdown(footer,unsafe_allow_html=True)
